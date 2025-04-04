@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
+
 import sys
+import os
 
 def read_pgn(pgn_fp):
     # Stub: Replace with actual implementation
@@ -8,24 +11,35 @@ def create_bitboards(pgn):
     # Stub: Replace with actual implementation
     return {"bitboard_key": "bitboard_value"}
 
-def write_data(output_fp, bitboards):
+def write_data(output_fp, bitboards, overwrite):
     # Stub: Replace with actual implementation
     pass
 
 def main():
-    if len(sys.argv) != 4:
-        print("Usage: script.py <count> <pgn_path> <output_path>")
+    if len(sys.argv) < 4 or len(sys.argv) > 5:
+        print("Usage: script.py <count> <pgn_path> <output_path> [-o]")
         sys.exit(1)
 
     count = int(sys.argv[1])
     pgn_path = sys.argv[2]
     output_path = sys.argv[3]
+    overwrite = '-o' in sys.argv
 
-    with open(pgn_path, 'r') as pgn_fp, open(output_path, 'w') as output_fp:
+    if not os.path.exists(pgn_path):
+        print(f"Error: The file {pgn_path} does not exist.")
+        sys.exit(1)
+
+    if os.path.exists(output_path) and not overwrite:
+        print(f"Error: The file {output_path} already exists. Use -o to overwrite.")
+        sys.exit(1)
+
+    mode = 'w' if overwrite else 'x'
+
+    with open(pgn_path, 'r') as pgn_fp, open(output_path, mode) as output_fp:
         for _ in range(count):
             pgn = read_pgn(pgn_fp)
             bitboards = create_bitboards(pgn)
-            write_data(output_fp, bitboards)
+            write_data(output_fp, bitboards, overwrite)
 
 if __name__ == "__main__":
     main()
