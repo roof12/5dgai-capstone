@@ -37,7 +37,13 @@ def write_data(output_fp, fen, label):
     writer = csv.writer(output_fp, quoting=csv.QUOTE_ALL)
     writer.writerow([fen, label])
 
-def main():
+def parse_args():
+    """
+    Parse command line arguments.
+    
+    Returns:
+        argparse.Namespace: Parsed command line arguments
+    """
     parser = argparse.ArgumentParser(description='Generate chess position data from PGN files.')
     parser.add_argument('pgn_path', help='Path to the input PGN file')
     parser.add_argument('output_path', help='Path to the output CSV file')
@@ -47,7 +53,7 @@ def main():
                        help='Overwrite output file if it exists')
     
     args = parser.parse_args()
-
+    
     if not os.path.exists(args.pgn_path):
         print(f"Error: The file {args.pgn_path} does not exist.")
         sys.exit(1)
@@ -55,7 +61,11 @@ def main():
     if os.path.exists(args.output_path) and not args.overwrite:
         print(f"Error: The file {args.output_path} already exists. Use -o to overwrite.")
         sys.exit(1)
+        
+    return args
 
+def main():
+    args = parse_args()
     mode = 'w' if args.overwrite else 'x'
 
     with open(args.pgn_path, 'r') as pgn_fp, open(args.output_path, mode) as output_fp:
