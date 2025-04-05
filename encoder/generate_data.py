@@ -2,18 +2,36 @@
 
 import sys
 import os
+import chess.pgn
 
 def read_pgn(pgn_fp):
-    # Stub: Replace with actual implementation
-    return "pgn_string"
+    game = chess.pgn.read_game(pgn_fp)
+    return game
 
-def create_bitboards(pgn):
-    # Stub: Replace with actual implementation
-    return {"bitboard_key": "bitboard_value"}
+def create_bitboards_pieces(board):
+    bitboards = {}
+    
+    for piece_type in chess.PIECE_TYPES:
+        # Create bitboard for white pieces
+        bitboards[f'w{chess.piece_symbol(piece_type)}'] = board.pieces(piece_type, chess.WHITE)
+        # Create bitboard for black pieces
+        bitboards[f'b{chess.piece_symbol(piece_type)}'] = board.pieces(piece_type, chess.BLACK)
+    
+    return bitboards
+
+def create_bitboards(game):
+    # Get the board position from the game
+    board = game.board()
+    bitboards = {}    
+    bitboards.update(create_bitboards_pieces(board))
+    return bitboards
 
 def write_data(output_fp, bitboards, overwrite):
     # Stub: Replace with actual implementation
     pass
+
+def print_bitboard(key, bb):
+    print(f"{key}:\n{bb}\n")
 
 def main():
     if len(sys.argv) < 4 or len(sys.argv) > 5:
@@ -37,8 +55,10 @@ def main():
 
     with open(pgn_path, 'r') as pgn_fp, open(output_path, mode) as output_fp:
         for _ in range(count):
-            pgn = read_pgn(pgn_fp)
-            bitboards = create_bitboards(pgn)
+            game = read_pgn(pgn_fp)
+            bitboards = create_bitboards(game)
+            for key, bb in bitboards.items():
+                print_bitboard(key, bb)
             write_data(output_fp, bitboards, overwrite)
 
 if __name__ == "__main__":
