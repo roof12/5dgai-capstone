@@ -5,6 +5,7 @@ import os
 import chess.pgn
 import random
 import csv
+import argparse
 from bitboard import create_bitboards, print_bitboard
 
 def read_pgn(pgn_fp):
@@ -37,32 +38,33 @@ def write_data(output_fp, fen, label):
     writer.writerow([fen, label])
 
 def main():
-    if len(sys.argv) < 4 or len(sys.argv) > 5:
-        print("Usage: script.py <count> <pgn_path> <output_path> [-o]")
+    parser = argparse.ArgumentParser(description='Generate chess position data from PGN files.')
+    parser.add_argument('pgn_path', help='Path to the input PGN file')
+    parser.add_argument('output_path', help='Path to the output CSV file')
+    parser.add_argument('-c', '--count', type=int, default=100000, 
+                       help='Number of games to process (default: process all games)')
+    parser.add_argument('-o', '--overwrite', action='store_true',
+                       help='Overwrite output file if it exists')
+    
+    args = parser.parse_args()
+
+    if not os.path.exists(args.pgn_path):
+        print(f"Error: The file {args.pgn_path} does not exist.")
         sys.exit(1)
 
-    count = int(sys.argv[1])
-    pgn_path = sys.argv[2]
-    output_path = sys.argv[3]
-    overwrite = '-o' in sys.argv
-
-    if not os.path.exists(pgn_path):
-        print(f"Error: The file {pgn_path} does not exist.")
+    if os.path.exists(args.output_path) and not args.overwrite:
+        print(f"Error: The file {args.output_path} already exists. Use -o to overwrite.")
         sys.exit(1)
 
-    if os.path.exists(output_path) and not overwrite:
-        print(f"Error: The file {output_path} already exists. Use -o to overwrite.")
-        sys.exit(1)
+    mode = 'w' if args.overwrite else 'x'
 
-    mode = 'w' if overwrite else 'x'
-
-    with open(pgn_path, 'r') as pgn_fp, open(output_path, mode) as output_fp:
+    with open(args.pgn_path, 'r') as pgn_fp, open(args.output_path, mode) as output_fp:
         # Write header row
         writer = csv.writer(output_fp, quoting=csv.QUOTE_ALL)
         writer.writerow(['fen', 'label'])
 
         games_processed = 0
-        for _ in range(count):
+        for _ in range(args.count):
             game = read_pgn(pgn_fp)
             if game is None:
                 print(f"\nReached end of PGN file after processing {games_processed} games.")
