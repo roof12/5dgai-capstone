@@ -11,9 +11,7 @@ def create_bitboards_pieces(board):
     
     return bitboards
 
-def create_bitboards(game):
-    # Get the board position from the game
-    board = game.board()
+def create_bitboards(board):
     bitboards = {}    
     bitboards.update(create_bitboards_pieces(board))
     return bitboards
