@@ -2,6 +2,7 @@
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+import tensorflow as tf
 
 def create_cnn_model():
     """
@@ -26,7 +27,7 @@ def create_cnn_model():
         # Flatten and dense layers
         Flatten(),
         Dense(128, activation='relu'),
-        Dropout(0.5),
+        Dropout(0.4),
         
         # Output layer with 3 classes
         Dense(3, activation='softmax')
@@ -34,7 +35,7 @@ def create_cnn_model():
     
     # Compile the model
     model.compile(
-        optimizer='adam',
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
         loss='categorical_crossentropy',
         metrics=['accuracy']
     )

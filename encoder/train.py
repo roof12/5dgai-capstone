@@ -121,7 +121,7 @@ def main():
     model = create_cnn_model()
     
     # Load data
-    data_path = 'data/out.csv'  # Update this path to your data directory
+    data_path = '../data/out.csv'  # Updated path to point to the correct location
     X_train, y_train = load_data(data_path)
     
     # Train model
@@ -129,7 +129,7 @@ def main():
         model,
         X_train,
         y_train,
-        batch_size=64,
+        batch_size=32,
         epochs=50
     )
     
