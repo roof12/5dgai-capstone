@@ -64,6 +64,53 @@ def parse_args():
         
     return args
 
+def count_material(board):
+    """
+    Count the material value for both white and black pieces.
+    
+    Args:
+        board: chess.Board object
+        
+    Returns:
+        tuple: (white_material, black_material) where each is the sum of piece values
+    """
+    piece_values = {
+        chess.PAWN: 1,
+        chess.KNIGHT: 3,
+        chess.BISHOP: 3,
+        chess.ROOK: 5,
+        chess.QUEEN: 9,
+        chess.KING: 0
+    }
+    
+    white_material = 0
+    black_material = 0
+    
+    # Count white pieces
+    for piece_type in chess.PIECE_TYPES:
+        material = len(board.pieces(piece_type, chess.WHITE)) * piece_values[piece_type]
+        white_material += material
+
+    # Count black pieces
+    for piece_type in chess.PIECE_TYPES:
+        material = len(board.pieces(piece_type, chess.BLACK)) * piece_values[piece_type]
+        black_material += material
+
+    return white_material, black_material
+
+def sign_diff(a, b):
+    """
+    Compare two values and return 1 if a > b, -1 if a < b, and 0 if equal.
+    
+    Args:
+        a: First value to compare
+        b: Second value to compare
+        
+    Returns:
+        int: 1 if a > b, -1 if a < b, 0 if equal
+    """
+    return (a > b) - (a < b)
+
 def main():
     args = parse_args()
     mode = 'w' if args.overwrite else 'x'
@@ -84,11 +131,11 @@ def main():
             for move in game.mainline_moves():
                 board.push(move)
             fen = board.fen()
+            # Count material for both sides
+            white_material, black_material = count_material(board)
 
-            # TODO: create bitboards and analyze to create a label
-            # bitboards = create_bitboards(board)
-            # create a random label for now        
-            label = random.choice([-1, 0, 1])
+            # Compare white material with black material, returning a value in [1, 0, -1]
+            label = sign_diff(white_material, black_material)
 
             write_data(output_fp, fen, label)
             games_processed += 1
