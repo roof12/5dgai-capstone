@@ -6,19 +6,26 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropou
 def create_cnn_model():
     """
     Creates a simple CNN model that takes [8, 8, 12] input and outputs 3 classes.
+    
+    Returns:
+        tensorflow.keras.models.Sequential: A compiled CNN model
     """
     model = Sequential([
-        # First convolutional layer
-        Conv2D(32, (3, 3), activation='relu', input_shape=(8, 8, 12)),
+        # First convolutional layer with padding to maintain dimensions
+        Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(8, 8, 12)),
         MaxPooling2D((2, 2)),
         
-        # Second convolutional layer
-        Conv2D(64, (3, 3), activation='relu'),
+        # Second convolutional layer with padding
+        Conv2D(64, (3, 3), activation='relu', padding='same'),
+        MaxPooling2D((2, 2)),
+        
+        # Third convolutional layer with padding
+        Conv2D(128, (3, 3), activation='relu', padding='same'),
         MaxPooling2D((2, 2)),
         
         # Flatten and dense layers
         Flatten(),
-        Dense(64, activation='relu'),
+        Dense(128, activation='relu'),
         Dropout(0.5),
         
         # Output layer with 3 classes
@@ -34,7 +41,7 @@ def create_cnn_model():
     
     return model
 
+# Only run this code if the file is executed directly
 if __name__ == "__main__":
-    # Create and print model summary
     model = create_cnn_model()
     model.summary() 
