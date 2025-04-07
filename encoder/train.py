@@ -121,7 +121,8 @@ def main():
     model = create_cnn_model()
     
     # Load data
-    data_path = '../data/out.csv'  # Updated path to point to the correct location
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(script_dir, '..', 'data', 'medium.csv')
     X_train, y_train = load_data(data_path)
     
     # Train model
@@ -140,6 +141,27 @@ def main():
     print("\nTraining completed!")
     print(f"Final validation accuracy: {history.history['val_accuracy'][-1]:.4f}")
     print(f"Final validation loss: {history.history['val_loss'][-1]:.4f}")
+
+def main_check():
+    # Load one row of data
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(script_dir, '..', 'data', 'medium.csv')
+    df = pd.read_csv(data_path)
+    sample_fen = df['fen'].iloc[0]
+    
+    # Convert to tensor
+    tensor = fen_to_tensor(sample_fen)
+ 
+    #  tensor = np.moveaxis(tensor, -1, 0)
+    for channel in range(tensor.shape[2]):
+        print(f"Channel {channel}:")
+        print(tensor[:, :, channel])
+        print("\n")
+    
+    # Print results
+    print(f"Sample FEN: {sample_fen}")
+    print("\nTensor shape:", tensor.shape)
+    print("\nTensor representation:")
 
 if __name__ == "__main__":
     main()
