@@ -8,8 +8,7 @@ def subtract_two_numbers(a, b):
 
 def main():
     print(add_two_numbers(2, 3))
-    # use 3 digit numbers AI!
-    print(subtract_two_numbers(10, 4))
+    print(subtract_two_numbers(987, 654))
 
 
 if __name__ == "__main__":
