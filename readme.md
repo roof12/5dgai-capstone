@@ -26,14 +26,18 @@ Test:
 
 ## Experiments
 
-First simple CNN, train on 1 mil, test on 100k:
+v1.0.0: First simple CNN, train on 1 mil, test on 100k
 
 * early exit, somewhere around epoch 20
 * Test Loss: 0.0552
 * Test Accuracy: 0.9785
 
-Change model, adding BatchNormalization and Activation after each Conv2D:
+v2.0.0: Change model, adding BatchNormalization and Activation after each Conv2D
 
 * early exit, best epoch 30
 * Test Loss: 0.0254
 * Test Accuracy: 0.9922
+
+v2.0.1: Change data, random mainline position instead of end position
+
+*
