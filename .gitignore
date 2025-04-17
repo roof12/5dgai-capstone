@@ -1,4 +1,10 @@
-data
+# Ignore the contents of the data directory (the large files)
+data/
+
+# track the DVC meta-files (.dvc) and DVC's internal .gitignore
+!data/**/*.dvc
+!data/.gitignore
+
 *.csv
 *.h5
 venv
