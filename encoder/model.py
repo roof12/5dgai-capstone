@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Activation, BatchNormalization, Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.layers import (
     Activation,
     BatchNormalization,
     Conv2D,
@@ -20,7 +20,8 @@ def create_cnn_model():
     Returns:
         tensorflow.keras.models.Sequential: A compiled CNN model
     """
-    model = Sequential( [
+    model = Sequential(
+        [
             # First convolutional layer with padding to maintain dimensions
             Conv2D(
                 32, (3, 3), activation="relu", padding="same", input_shape=(8, 8, 12)
