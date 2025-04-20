@@ -1,0 +1,4 @@
+# filter output from of Jupyter notebooks on commit
+# only code is left
+*.ipynb filter=strip-notebook-output
+
