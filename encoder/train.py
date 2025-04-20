@@ -27,12 +27,28 @@ def load_data(data_path):
     # Convert FEN strings to tensors
     X_train = np.array([fen_to_tensor(fen) for fen in df["fen"]])
 
-    # Convert labels to one-hot encoding
-    y_train = tf.keras.utils.to_categorical(
-        df["label"] + 1, num_classes=3
-    )  # Convert -1,0,1 to 0,1,2
+    # Convert the material comparison label to one-hot encoding (for the 3-class output)
+    # Convert -1,0,1 to 0,1,2
+    y_train_categorical = tf.keras.utils.to_categorical(
+        df["material_cmp"] + 1, num_classes=3
+    )
 
-    return X_train, y_train
+    # Extract the binary labels
+    y_train_castle_white_kingside = np.array(df["castle_white_kingside"].astype(int))
+    y_train_castle_white_queenside = np.array(df["castle_white_queenside"].astype(int))
+    y_train_castle_black_kingside = np.array(df["castle_black_kingside"].astype(int))
+    y_train_castle_black_queenside = np.array(df["castle_black_queenside"].astype(int))
+
+    return (
+        X_train,
+        (
+            y_train_categorical,
+            y_train_castle_white_kingside,
+            y_train_castle_white_queenside,
+            y_train_castle_black_kingside,
+            y_train_castle_black_queenside,
+        ),
+    )
 
 
 def train_model(
@@ -55,10 +71,17 @@ def train_model(
     # Create callbacks
     callbacks = [
         ModelCheckpoint(
-            "best_model.keras", monitor="val_accuracy", save_best_only=True, verbose=1
+            "best_model.keras",
+            monitor="val_output_material_cmp_accuracy",
+            save_best_only=True,
+            verbose=1,
         ),
         EarlyStopping(
-            monitor="val_loss", patience=5, restore_best_weights=True, verbose=1
+            monitor="val_output_material_cmp_loss",
+            patience=5,
+            restore_best_weights=True,
+            mode="min",
+            verbose=1,
         ),
     ]
 
@@ -70,7 +93,7 @@ def train_model(
         epochs=epochs,
         validation_split=validation_split,
         callbacks=callbacks,
-        verbose=1,
+        verbose=0,
     )
 
     return history
@@ -90,20 +113,32 @@ def main():
     model = create_cnn_model()
 
     # Load data
-    X_train, y_train = load_data(
-        args.data_path
-    )  # Use the command line argument for data_path
+    X_train, y_train = load_data(args.data_path)
 
     # Train model
     history = train_model(model, X_train, y_train, batch_size=32, epochs=50)
 
     # Save final model
-    model.save("final_model.h5")
+    model.save("final_model.keras")
 
     # Print training summary
     print("\nTraining completed!")
-    print(f"Final validation accuracy: {history.history['val_accuracy'][-1]:.4f}")
     print(f"Final validation loss: {history.history['val_loss'][-1]:.4f}")
+    print(
+        f"Final validation accuracy output_material_cmp: {history.history['val_output_material_cmp_accuracy'][-1]:.4f}"
+    )
+    print(
+        f"Final validation accuracy castle_white_kingside: {history.history['val_output_castle_white_kingside_accuracy'][-1]:.4f}"
+    )
+    print(
+        f"Final validation accuracy castle_white_queenside: {history.history['val_output_castle_white_queenside_accuracy'][-1]:.4f}"
+    )
+    print(
+        f"Final validation accuracy castle_black_kingside: {history.history['val_output_castle_black_kingside_accuracy'][-1]:.4f}"
+    )
+    print(
+        f"Final validation accuracy castle_black_queenside: {history.history['val_output_castle_black_queenside_accuracy'][-1]:.4f}"
+    )
 
 
 def main_check():

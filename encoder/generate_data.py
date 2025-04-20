@@ -27,9 +27,17 @@ def read_pgn(pgn_fp):
         return None
 
 
-def write_data(output_fp, fen, label):
+def write_data(
+    output_fp,
+    fen,
+    material_cmp,
+    castle_white_kingside,
+    castle_white_queenside,
+    castle_black_kingside,
+    castle_black_queenside,
+):
     """
-    Write a row to the CSV file containing the FEN and label.
+    Write a row to the CSV file containing the FEN and labels.
 
     Args:
         output_fp: File pointer to the output CSV file
@@ -37,7 +45,16 @@ def write_data(output_fp, fen, label):
         label: The label for this position (-1, 0, or 1)
     """
     writer = csv.writer(output_fp, quoting=csv.QUOTE_ALL)
-    writer.writerow([fen, label])
+    writer.writerow(
+        [
+            fen,
+            material_cmp,
+            castle_white_kingside,
+            castle_white_queenside,
+            castle_black_kingside,
+            castle_black_queenside,
+        ]
+    )
 
 
 def parse_args():
@@ -46,6 +63,10 @@ def parse_args():
 
     Returns:
         argparse.Namespace: Parsed command line arguments
+        "white_kingside": bool(board.castling_rights & chess.KINGSIDE),
+        "white_queenside": bool(board.castling_rights & chess.QUEENSIDE),
+        "black_kingside": bool(board.castling_rights & chess.kingside),
+        "black_queenside": bool(board.castling_rights & chess.queenside),
     """
     parser = argparse.ArgumentParser(
         description="Generate chess position data from PGN files."
@@ -56,7 +77,7 @@ def parse_args():
         "-c",
         "--count",
         type=int,
-        default=100000,
+        default=9999999999,
         help="Number of games to process (default: process all games)",
     )
     parser.add_argument(
@@ -137,7 +158,16 @@ def main():
     with open(args.pgn_path, "r") as pgn_fp, open(args.output_path, mode) as output_fp:
         # Write header row
         writer = csv.writer(output_fp, quoting=csv.QUOTE_ALL)
-        writer.writerow(["fen", "label"])
+        writer.writerow(
+            [
+                "fen",
+                "material_cmp",
+                "castle_white_kingside",
+                "castle_white_queenside",
+                "castle_black_kingside",
+                "castle_black_queenside",
+            ],
+        )
 
         games_processed = 0
         for _ in range(args.count):
@@ -159,13 +189,31 @@ def main():
                 board.push(move)
 
             fen = board.fen()
+
             # Count material for both sides
             white_material, black_material = count_material(board)
-
             # Compare white material with black material, returning a value in [1, 0, -1]
-            label = sign_diff(white_material, black_material)
+            material_cmp = sign_diff(white_material, black_material)
 
-            write_data(output_fp, fen, label)
+            # determine castling rights
+            castle_white_kingside = int(board.has_kingside_castling_rights(chess.WHITE))
+            castle_white_queenside = int(
+                board.has_queenside_castling_rights(chess.WHITE)
+            )
+            castle_black_kingside = int(board.has_kingside_castling_rights(chess.BLACK))
+            castle_black_queenside = int(
+                board.has_queenside_castling_rights(chess.BLACK)
+            )
+
+            write_data(
+                output_fp,
+                fen,
+                material_cmp,
+                castle_white_kingside,
+                castle_white_queenside,
+                castle_black_kingside,
+                castle_black_queenside,
+            )
             games_processed += 1
 
 

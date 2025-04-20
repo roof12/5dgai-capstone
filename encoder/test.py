@@ -21,11 +21,28 @@ def load_test_data(data_path):
     df = pd.read_csv(data_path)
     X_test = np.array([fen_to_tensor(fen) for fen in df["fen"]])
 
-    # Convert labels to one-hot encoding
-    y_test = tf.keras.utils.to_categorical(
-        df["label"] + 1, num_classes=3
-    )  # Convert -1,0,1 to 0,1,2
-    return X_test, y_test
+    # Convert the material comparison label to one-hot encoding (for the 3-class output)
+    # Convert -1,0,1 to 0,1,2
+    y_test_categorical = tf.keras.utils.to_categorical(
+        df["material_cmp"] + 1, num_classes=3
+    )
+
+    # Extract the binary labels
+    y_test_castle_white_kingside = np.array(df["castle_white_kingside"].astype(int))
+    y_test_castle_white_queenside = np.array(df["castle_white_queenside"].astype(int))
+    y_test_castle_black_kingside = np.array(df["castle_black_kingside"].astype(int))
+    y_test_castle_black_queenside = np.array(df["castle_black_queenside"].astype(int))
+
+    return (
+        X_test,
+        (
+            y_test_categorical,
+            y_test_castle_white_kingside,
+            y_test_castle_white_queenside,
+            y_test_castle_black_kingside,
+            y_test_castle_black_queenside,
+        ),
+    )
 
 
 def evaluate_model(model, X_test, y_test):
@@ -35,13 +52,33 @@ def evaluate_model(model, X_test, y_test):
     Args:
         model: The trained Keras model
         X_test: Test features
-        y_test: Test labels
+        y_test: Test labels (list/tuple of length 5: material_cmp, castling rights)
 
     Returns:
-        tuple: (loss, accuracy)
+        dict: A dictionary containing total loss and individual metrics per output.
     """
-    loss, accuracy = model.evaluate(X_test, y_test, verbose=1)
-    return loss, accuracy
+    results = model.evaluate(X_test, y_test, verbose=1)
+
+    # We should be able to use model.metrics_names. Unfortunately includes
+    # the unexpected value 'compile_metrics' and does not include accuracies.
+    # As a workaround, it is manually specified here.
+    metrics_names = [
+        "total_loss",
+        "output_material_cmp_loss",
+        "output_castle_white_kingside_loss",
+        "output_castle_white_queenside_loss",
+        "output_castle_black_kingside_loss",
+        "output_castle_black_queenside_loss",
+        "output_material_cmp_accuracy",
+        "output_castle_white_kingside_accuracy",
+        "output_castle_white_queenside_accuracy",
+        "output_castle_black_kingside_accuracy",
+        "output_castle_black_queenside_accuracy",
+    ]
+    if len(results) != len(metrics_names):
+        print(f"Warning: Unexpected number of evaluation results: {len(results)}")
+
+    return dict(zip(metrics_names, results))
 
 
 def main():
@@ -55,17 +92,31 @@ def main():
     args = parser.parse_args()
 
     # Load the model
-    model = tf.keras.models.load_model("best_model.h5")  # Load the trained model
+    model = tf.keras.models.load_model("best_model.keras")  # Load the trained model
 
     # Load test data
     X_test, y_test = load_test_data(args.data_path)
 
     # Evaluate model
-    loss, accuracy = evaluate_model(model, X_test, y_test)
+    evaluation_results = evaluate_model(model, X_test, y_test)
 
     # Print evaluation results
-    print(f"Test Loss: {loss:.4f}")
-    print(f"Test Accuracy: {accuracy:.4f}")
+    print(f"Test loss: {evaluation_results['total_loss']:.4f}")
+    print(
+        f"Test output_material_cmp accuracy: {evaluation_results['output_material_cmp_accuracy']:.4f}"
+    )
+    print(
+        f"Test castle_white_kingside accuracy: {evaluation_results['output_castle_white_kingside_accuracy']:.4f}"
+    )
+    print(
+        f"Test castle_white_queenside accuracy: {evaluation_results['output_castle_white_queenside_accuracy']:.4f}"
+    )
+    print(
+        f"Test castle_black_kingside accuracy: {evaluation_results['output_castle_black_kingside_accuracy']:.4f}"
+    )
+    print(
+        f"Test castle_black_queenside accuracy: {evaluation_results['output_castle_black_queenside_accuracy']:.4f}"
+    )
 
 
 if __name__ == "__main__":
