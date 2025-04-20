@@ -96,7 +96,7 @@ def train_model(
     return history
 
 
-def train(data_path):
+def train(data_path, batch_size=32, epochs=50, validation_split=0.2):
     # Create model
     model = create_cnn_model()
 
@@ -104,7 +104,7 @@ def train(data_path):
     X_train, y_train = load_data(data_path)
 
     # Train model
-    history = train_model(model, X_train, y_train, batch_size=32, epochs=50)
+    history = train_model(model, X_train, y_train, batch_size, epochs)
 
     # Save final model
     model.save("final_model.keras")
