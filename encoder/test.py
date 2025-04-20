@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import argparse
 from model import create_cnn_model  # Ensure this imports your model correctly
 from utils import fen_to_tensor  # Import fen_to_tensor from utils
 
@@ -81,21 +80,12 @@ def evaluate_model(model, X_test, y_test):
     return dict(zip(metrics_names, results))
 
 
-def main():
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Test a CNN model on chess data.")
-    parser.add_argument(
-        "data_path",
-        type=str,
-        help="Path to the CSV file containing FEN strings and labels",
-    )
-    args = parser.parse_args()
-
+def test(data_path):
     # Load the model
     model = tf.keras.models.load_model("best_model.keras")  # Load the trained model
 
     # Load test data
-    X_test, y_test = load_test_data(args.data_path)
+    X_test, y_test = load_test_data(data_path)
 
     # Evaluate model
     evaluation_results = evaluate_model(model, X_test, y_test)
@@ -117,7 +107,3 @@ def main():
     print(
         f"Test castle_black_queenside accuracy: {evaluation_results['output_castle_black_queenside_accuracy']:.4f}"
     )
-
-
-if __name__ == "__main__":
-    main()
