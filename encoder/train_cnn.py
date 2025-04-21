@@ -82,6 +82,13 @@ def train_model(
         ),
     ]
 
+    print("Type of y_train:", type(y_train))
+    print("Length of y_train:", len(y_train))
+    for i, target_array in enumerate(
+        y_train[:10]
+    ):  # Iterating over the first 10 elements
+        print(f"Shape of y_train[{i}]:", target_array.shape)
+
     # Train the model
     history = model.fit(
         X_train,
@@ -127,4 +134,3 @@ def train(data_path, batch_size=32, epochs=50, validation_split=0.2):
     print(
         f"Final validation accuracy castle_black_queenside: {history.history['val_output_castle_black_queenside_accuracy'][-1]:.4f}"
     )
-
